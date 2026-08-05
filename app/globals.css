@@ -1,26 +1,387 @@
 @import "tailwindcss";
 
+@theme {
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Snow + Forest theme */
+  --color-bg: 250 250 248;           /* #FAFAF8 snow */
+  --color-bg-panel: 255 255 255;     /* #FFFFFF white panel */
+  --color-accent: 31 77 61;          /* #1F4D3D deep forest */
+  --color-steel: 107 117 112;        /* #6B7570 muted */
+  --color-text: 22 26 24;            /* #161A18 ink */
+  --color-text-muted: 138 144 136;   /* #8A9088 */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-text));
+  font-family: var(--font-body);
+}
+
+.vault-panel {
+  position: relative;
+  background: rgb(var(--color-bg-panel) / 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgb(var(--color-accent) / 0.18);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgb(22 26 24 / 0.06);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vault-panel:hover {
+  border-color: rgb(var(--color-accent) / 0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgb(22 26 24 / 0.1), 0 0 24px rgb(var(--color-accent) / 0.35);
+}
+
+/* Same panel look, no hover-lift — for static/decorative elements like the eyebrow badge */
+.vault-panel-static {
+  position: relative;
+  background: rgb(var(--color-bg-panel) / 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgb(var(--color-accent) / 0.18);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgb(22 26 24 / 0.06);
+}
+
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--color-accent) / 0.35),
+    transparent
+  );
+}
+
+.hairline-solid {
+  height: 1px;
+  background: rgb(var(--color-accent) / 0.25);
+}
+
+/* Guilloché-style concentric ring pattern — security paper motif */
+.guilloche {
+  background-image: repeating-radial-gradient(
+    circle at center,
+    rgb(var(--color-accent) / 0.09) 0px,
+    rgb(var(--color-accent) / 0.09) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+  mask-image: radial-gradient(ellipse 60% 55% at center, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 55% at center, black 0%, transparent 75%);
+}
+
+/* Enlarged guilloché rings for hero-scale background use */
+.guilloche-hero {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 900px;
+  height: 900px;
+  transform: translate(-50%, -50%);
+  background-image: repeating-radial-gradient(
+    circle at center,
+    rgb(var(--color-accent) / 0.1) 0px,
+    rgb(var(--color-accent) / 0.1) 1px,
+    transparent 1px,
+    transparent 16px
+  );
+  mask-image: radial-gradient(ellipse 55% 55% at center, black 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 55% 55% at center, black 0%, transparent 75%);
+}
+
+.vault-noise {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+}
+
+/* Fine grid — visible "blueprint" texture */
+.vault-grid {
+  background-image:
+    linear-gradient(rgb(var(--color-accent) / 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--color-accent) / 0.14) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 85% 75% at center, black 0%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at center, black 0%, transparent 90%);
+}
+
+/* Radial glow wash */
+.vault-glow-strong {
+  background:
+    radial-gradient(circle at 15% 20%, rgb(var(--color-accent) / 0.2), transparent 45%),
+    radial-gradient(circle at 85% 75%, rgb(var(--color-accent) / 0.16), transparent 45%);
+}
+
+/* Diagonal light beam sweep */
+.vault-beam {
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgb(var(--color-accent) / 0.09) 50%,
+    transparent 60%
+  );
+}
+
+/* Scattered dot texture */
+.scatter-dots {
+  background-image: radial-gradient(
+    rgb(var(--color-accent) / 0.28) 1.6px,
+    transparent 1.6px
+  );
+  background-size: 42px 42px;
+}
+
+/* Corner bracket lines (small, reusable) */
+.corner-lines-tl {
+  border-top: 1px solid rgb(var(--color-accent) / 0.25);
+  border-left: 1px solid rgb(var(--color-accent) / 0.25);
+}
+.corner-lines-br {
+  border-bottom: 1px solid rgb(var(--color-accent) / 0.25);
+  border-right: 1px solid rgb(var(--color-accent) / 0.25);
+}
+
+/* Slow rotating radar-sweep light */
+.radar-sweep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 640px;
+  height: 640px;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgb(var(--color-accent) / 0.19) 12deg,
+    transparent 45deg
+  );
+  border-radius: 9999px;
+  mask-image: radial-gradient(circle, black 0%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 68%);
+  animation: radarSpin 10s linear infinite;
+}
+
+@keyframes radarSpin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Vault dial rings — echoes the Logo's combination dial, used in HeroBackground */
+.dial-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--color-accent) / 0.11);
+  transform: translate(-50%, -50%);
+}
+
+.dial-ring-outer {
+  width: 420px;
+  height: 420px;
+  animation: dialSpin 90s linear infinite;
+}
+
+.dial-ring-inner {
+  width: 280px;
+  height: 280px;
+  border-color: rgb(var(--color-accent) / 0.16);
+  animation: dialSpinReverse 70s linear infinite;
+}
+
+.dial-tick {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: rgb(var(--color-accent) / 0.2);
+  transform-origin: center 210px;
+}
+
+.dial-tick-0 { transform: translate(-50%, -210px) rotate(0deg); }
+.dial-tick-1 { transform: translate(-50%, -210px) rotate(90deg); }
+.dial-tick-2 { transform: translate(-50%, -210px) rotate(180deg); }
+.dial-tick-3 { transform: translate(-50%, -210px) rotate(270deg); }
+
+@keyframes dialSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes dialSpinReverse {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+/* Flanking vertical hairlines */
+.flank-line {
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(var(--color-accent) / 0.25),
+    transparent
+  );
+}
+
+/* Stamp badge — rotated square with corner ticks, not a pill */
+.stamp-badge {
+  position: relative;
+  border: 1px solid rgb(var(--color-accent) / 0.4);
+  transform: rotate(-2deg);
+}
+
+.stamp-badge::before,
+.stamp-badge::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: 1px solid rgb(var(--color-accent));
+}
+
+.stamp-badge::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.stamp-badge::after {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Wax-seal style circular stamp */
+.seal-ring {
+  border: 1.5px dashed rgb(var(--color-accent) / 0.4);
+}
+
+.seal-ring-inner {
+  border: 1px solid rgb(var(--color-accent) / 0.5);
+}
+
+/* Target-bracket corners — small L-shaped brackets framing a panel, "targeted/verified" feel */
+.target-brackets::before,
+.target-brackets::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.target-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid rgb(var(--color-accent) / 0.55);
+  border-left: 2px solid rgb(var(--color-accent) / 0.55);
+  border-top-left-radius: 6px;
+}
+
+.target-brackets::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid rgb(var(--color-accent) / 0.55);
+  border-right: 2px solid rgb(var(--color-accent) / 0.55);
+  border-bottom-right-radius: 6px;
+}
+
+/* Rivet — small decorative screw/bolt dot for panel corners */
+.rivet {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgb(var(--color-accent) / 0.35);
+  box-shadow:
+    inset 0 1px 1px rgb(0 0 0 / 0.15),
+    0 1px 0 rgb(255 255 255 / 0.4);
+}
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgb(255 255 255 / 0.35),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+
+.btn-shimmer:hover::after {
+  left: 125%;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgb(var(--color-accent));
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(var(--color-accent) / 0.4); }
+  50% { box-shadow: 0 0 0 6px rgb(var(--color-accent) / 0); }
+}
+
+.scroll-cue {
+  animation: bounceDown 2s ease-in-out infinite;
+}
+
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(6px); opacity: 1; }
+}
+
+/* Accordion chevron — used in components/ui/accordion.tsx's ChevronDown icon */
+.accordion-chevron {
+  transition: transform 0.5s ease, color 0.3s ease;
+}
+
+[data-state="open"] .accordion-chevron {
+  transform: rotate(180deg);
+  color: rgb(var(--color-accent));
+}
+
+/* Respect reduced-motion preference across all decorative animations */
+@media (prefers-reduced-motion: reduce) {
+  .radar-sweep,
+  .dial-ring-outer,
+  .dial-ring-inner,
+  .badge-dot,
+  .scroll-cue {
+    animation: none !important;
+  }
+
+  .btn-shimmer::after {
+    transition: none !important;
+  }
+
+  * {
+    scroll-behavior: auto !important;
+  }
 }
