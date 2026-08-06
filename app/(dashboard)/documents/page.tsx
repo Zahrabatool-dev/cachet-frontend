@@ -96,7 +96,6 @@ const setFilters = (newFilters: FilterState) => {
 
     try {
       await api.post("/documents/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
           const percent = Math.round((e.loaded * 100) / (e.total || 1));
           setQueue((prev) =>
