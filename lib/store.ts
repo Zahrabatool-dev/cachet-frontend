@@ -7,6 +7,7 @@ type User = {
   email: string;
   avatar?: string | null;
 };
+
 type AuthState = {
   token: string | null;
   user: User | null;
@@ -29,6 +30,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "cachet-auth", // localStorage key
       partialize: (state) => ({ token: state.token, user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        if (state && state.token) {
+          state.isAuthenticated = true;
+        }
+      },
     }
   )
 );
