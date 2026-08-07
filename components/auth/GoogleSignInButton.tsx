@@ -13,18 +13,9 @@ export function GoogleSignInButton() {
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        // access_token se user info le kar backend ko bhejte hain
-        const userInfoRes = await fetch(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } }
-        );
-        const userInfo = await userInfoRes.json();
-
+        // Sirf access_token backend ko bhejo — backend khud Google se verify + userinfo fetch karega
         const res = await api.post("/auth/google-token", {
-          email: userInfo.email,
-          name: userInfo.name,
-          picture: userInfo.picture,
-          googleId: userInfo.sub,
+          access_token: tokenResponse.access_token,
         });
 
         setAuth(res.data.token, res.data.user);
