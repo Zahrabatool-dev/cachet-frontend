@@ -16,10 +16,13 @@ import { type Category, CATEGORIES } from "@/lib/utils/fileHelpers";
 import api from "@/lib/api";
 import { useStorageStore } from "@/lib/storageStore";
 
+type UploadMetadata = { category: Category; tags: string[]; expiryDate: string | null };
+
 export default function DocumentsPage() {
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [queue, setQueue] = useState<QueuedFile[]>([]);
+  const [itemMetadata, setItemMetadata] = useState<Record<string, UploadMetadata>>({});
   const [view, setView] = useState<"grid" | "list">("grid");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,10 +86,7 @@ const setFilters = (newFilters: FilterState) => {
     setModalOpen(true);
   };
 
-  const uploadFile = async (
-    item: QueuedFile,
-    metadata: { category: Category; tags: string[]; expiryDate: string | null }
-  ) => {
+  const uploadFile = async (item: QueuedFile, metadata: UploadMetadata) => {
     const formData = new FormData();
     formData.append("file", item.file);
     formData.append("title", item.file.name);
@@ -119,9 +119,7 @@ const setFilters = (newFilters: FilterState) => {
     }
   };
 
-  const handleConfirmUpload = (
-    metadataList: { category: Category; tags: string[]; expiryDate: string | null }[]
-  ) => {
+  const handleConfirmUpload = (metadataList: UploadMetadata[]) => {
     setModalOpen(false);
 
     const newQueue: QueuedFile[] = pendingFiles.map((file, i) => ({
@@ -131,6 +129,13 @@ const setFilters = (newFilters: FilterState) => {
       status: "uploading",
     }));
 
+    // metadata ko id ke against save karo taake retry pe use ho sake
+    const newMetadata: Record<string, UploadMetadata> = {};
+    newQueue.forEach((item, idx) => {
+      newMetadata[item.id] = metadataList[idx];
+    });
+    setItemMetadata((prev) => ({ ...prev, ...newMetadata }));
+
     setQueue((prev) => [...newQueue, ...prev]);
     newQueue.forEach((item, idx) => uploadFile(item, metadataList[idx]));
     setPendingFiles([]);
@@ -138,6 +143,25 @@ const setFilters = (newFilters: FilterState) => {
 
   const removeFromQueue = (id: string) => {
     setQueue((prev) => prev.filter((f) => f.id !== id));
+    setItemMetadata((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const retryUpload = (id: string) => {
+    const item = queue.find((f) => f.id === id);
+    const metadata = itemMetadata[id];
+    if (!item || !metadata) {
+      toast.error("Couldn't retry — please re-upload this file");
+      return;
+    }
+
+    setQueue((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, status: "uploading", progress: 0 } : f))
+    );
+    uploadFile(item, metadata);
   };
 
   const handleDelete = async (id: string) => {
@@ -251,7 +275,7 @@ const setFilters = (newFilters: FilterState) => {
 
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
         <DropZone onFilesSelected={handleFilesSelected} />
-        <UploadQueue files={queue} onRemove={removeFromQueue} />
+        <UploadQueue files={queue} onRemove={removeFromQueue} onRetry={retryUpload} />
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }} className="mt-6">

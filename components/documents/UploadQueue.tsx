@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, CheckCircle2, AlertCircle, RotateCw } from "lucide-react";
 import { getFileIcon, formatFileSize } from "@/lib/utils/fileHelpers";
 
 export type QueuedFile = {
@@ -15,14 +15,17 @@ export type QueuedFile = {
 type UploadQueueProps = {
   files: QueuedFile[];
   onRemove: (id: string) => void;
+  onRetry: (id: string) => void;
 };
 
 function ProgressItem({
   item,
   onRemove,
+  onRetry,
 }: {
   item: QueuedFile;
   onRemove: (id: string) => void;
+  onRetry: (id: string) => void;
 }) {
   const Icon = getFileIcon(item.file.name);
 
@@ -49,42 +52,65 @@ function ProgressItem({
           </span>
         </div>
 
-        <div className="mt-1.5 h-1 rounded-full bg-neutral-200 overflow-hidden">
-          <motion.div
-            className="h-full rounded-full"
-            style={{
-              background:
-                item.status === "error"
-                  ? "#dc2626"
-                  : item.status === "success"
-                  ? "rgb(var(--color-accent))"
-                  : "rgb(var(--color-accent) / 0.6)",
-            }}
-            initial={{ width: "0%" }}
-            animate={{ width: `${item.progress}%` }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          />
-        </div>
+        {item.status === "error" ? (
+          <p className="mt-1 text-xs text-red-500">
+            Upload failed —{" "}
+            <button
+              onClick={() => onRetry(item.id)}
+              className="underline hover:text-red-600 font-medium"
+            >
+              tap to retry
+            </button>
+          </p>
+        ) : (
+          <div className="mt-1.5 h-1 rounded-full bg-neutral-200 overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{
+                background:
+                  item.status === "success"
+                    ? "rgb(var(--color-accent))"
+                    : "rgb(var(--color-accent) / 0.6)",
+              }}
+              initial={{ width: "0%" }}
+              animate={{ width: `${item.progress}%` }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="shrink-0 w-5 h-5 flex items-center justify-center">
+      <div className="shrink-0 flex items-center gap-1.5">
         <AnimatePresence mode="wait">
           {item.status === "success" ? (
             <motion.div key="ok" initial={{ scale: 0 }} animate={{ scale: 1 }}>
               <CheckCircle2 size={18} className="text-[rgb(var(--color-accent))]" />
             </motion.div>
           ) : item.status === "error" ? (
-            <motion.div key="err" initial={{ scale: 0 }} animate={{ scale: 1 }}>
-              <AlertCircle size={18} className="text-red-500" />
+            <motion.div key="err" className="flex items-center gap-1.5" initial={{ scale: 0 }} animate={{ scale: 1 }}>
+              <button
+                onClick={() => onRetry(item.id)}
+                className="text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-accent))] transition-colors"
+                title="Retry upload"
+              >
+                <RotateCw size={16} />
+              </button>
+              <button
+                onClick={() => onRemove(item.id)}
+                className="text-[rgb(var(--color-text-muted))] hover:text-red-500 transition-colors"
+                title="Remove"
+              >
+                <X size={16} />
+              </button>
             </motion.div>
           ) : (
-            <button
+            <motion.button
               key="cancel"
               onClick={() => onRemove(item.id)}
               className="text-[rgb(var(--color-text-muted))] hover:text-red-500 transition-colors"
             >
               <X size={16} />
-            </button>
+            </motion.button>
           )}
         </AnimatePresence>
       </div>
@@ -92,14 +118,14 @@ function ProgressItem({
   );
 }
 
-export function UploadQueue({ files, onRemove }: UploadQueueProps) {
+export function UploadQueue({ files, onRemove, onRetry }: UploadQueueProps) {
   if (files.length === 0) return null;
 
   return (
     <div className="mt-4 space-y-2.5">
       <AnimatePresence mode="popLayout">
         {files.map((item) => (
-          <ProgressItem key={item.id} item={item} onRemove={onRemove} />
+          <ProgressItem key={item.id} item={item} onRemove={onRemove} onRetry={onRetry} />
         ))}
       </AnimatePresence>
     </div>
