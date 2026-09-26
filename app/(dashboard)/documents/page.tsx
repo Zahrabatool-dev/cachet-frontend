@@ -112,10 +112,22 @@ const setFilters = (newFilters: FilterState) => {
       useStorageStore.setState({ isLoaded: false });
       useStorageStore.getState().fetchStorage();
     } catch (err: any) {
+      let message = "Upload failed";
+
+      if (err?.response?.data?.message) {
+        // backend ne wajah bataayi (file type, size, auth, etc.)
+        message = err.response.data.message;
+      } else if (err?.code === "ECONNABORTED") {
+        message = "Upload timed out - try a smaller file or better connection";
+      } else if (!err?.response) {
+        // request backend tak pohanchi hi nahi — network/browser level issue
+        message = "Couldn't read this file - try picking it from your gallery instead of Drive";
+      }
+
       setQueue((prev) =>
-        prev.map((f) => (f.id === item.id ? { ...f, status: "error" } : f))
+        prev.map((f) => (f.id === item.id ? { ...f, status: "error", errorMessage: message } : f))
       );
-      toast.error(err?.response?.data?.message || "Upload failed");
+      toast.error(message);
     }
   };
 
@@ -159,7 +171,9 @@ const setFilters = (newFilters: FilterState) => {
     }
 
     setQueue((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, status: "uploading", progress: 0 } : f))
+      prev.map((f) =>
+        f.id === id ? { ...f, status: "uploading", progress: 0, errorMessage: undefined } : f
+      )
     );
     uploadFile(item, metadata);
   };

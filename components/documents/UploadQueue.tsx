@@ -10,6 +10,7 @@ export type QueuedFile = {
   file: File;
   progress: number;
   status: "uploading" | "success" | "error";
+  errorMessage?: string;
 };
 
 type UploadQueueProps = {
@@ -54,7 +55,7 @@ function ProgressItem({
 
         {item.status === "error" ? (
           <p className="mt-1 text-xs text-red-500">
-            Upload failed —{" "}
+            {item.errorMessage || "Upload failed"} —{" "}
             <button
               onClick={() => onRetry(item.id)}
               className="underline hover:text-red-600 font-medium"
