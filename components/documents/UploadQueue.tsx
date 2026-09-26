@@ -55,7 +55,7 @@ function ProgressItem({
 
         {item.status === "error" ? (
           <p className="mt-1 text-xs text-red-500">
-            {item.errorMessage || "Upload failed"} —{" "}
+            {item.errorMessage || "Upload failed"} -{" "}
             <button
               onClick={() => onRetry(item.id)}
               className="underline hover:text-red-600 font-medium"

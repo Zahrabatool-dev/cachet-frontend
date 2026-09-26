@@ -105,7 +105,7 @@ export function ZipUploadModal({ open, onClose, onImported }: ZipUploadModalProp
             {!result ? (
               <>
                 <p className="text-sm text-[rgb(var(--color-text-muted))] mb-4">
-                  Upload a .zip containing PDF, JPG, or PNG files — each one becomes a document.
+                  Upload a .zip containing PDF, JPG, or PNG files - each one becomes a document.
                 </p>
 
                 <input ref={inputRef} type="file" accept=".zip" onChange={handleFileSelect} className="hidden" />
